@@ -1,0 +1,59 @@
+{
+  "brand": {
+    "title": "Abdo Càfe",
+    "footer": "Powered by Abdo Càfe ",
+    "embedColor": "#FFD700"
+  },
+  "milestones": {
+    "totalLevels": 9,
+    "months": [
+      0,
+      1,
+      3,
+      6,
+      12,
+      24,
+      36,
+      60,
+      72
+    ]
+  },
+  "theme": {
+    "canvas": {
+      "width": 1400,
+      "height": 500
+    },
+    "timeline": {
+      "pastOpacity": 0.35,
+      "lineColor": "rgba(255, 215, 0, 0.6)",
+      "currentGlow": "#FFD700"
+    }
+  },
+  "defaultEmojis": {
+    "nitro": {
+      "1": "🥉",
+      "2": "🥈",
+      "3": "🥇",
+      "4": "🟦",
+      "5": "💎",
+      "6": "💚",
+      "7": "❤️",
+      "8": "🪽",
+      "9": "👑"
+    },
+    "boost": {
+      "1": "🔺",
+      "2": "🔷",
+      "3": "🔶",
+      "4": "🟪",
+      "5": "⭐",
+      "6": "💠",
+      "7": "🔮",
+      "8": "🪄",
+      "9": "💎"
+    }
+  },
+  "bot": {
+    "token": "PUT_YOUR_BOT_TOKEN_HERE"
+  }
+}
