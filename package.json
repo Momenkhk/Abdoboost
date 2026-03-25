@@ -1,0 +1,16 @@
+{
+  "name": "abdoboost-premium-bot",
+  "version": "1.0.0",
+  "description": "Premium Nitro and Boost milestone cards for Abdo Càfe",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js && node --check src/cardRenderer.js && node --check src/storage.js && node --check src/preview.js",
+    "preview": "node src/preview.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.67",
+    "discord.js": "^14.20.0"
+  }
+}
