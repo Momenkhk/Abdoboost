@@ -112,7 +112,8 @@ async function sendMilestoneMessage(message, type) {
     canvasSize: config.theme.canvas,
     totalLevels: config.milestones.totalLevels,
     type,
-    progressLine
+    progressLine,
+    emojis
   });
 
   const fileName = `${type}-milestone-${message.author.id}.png`;

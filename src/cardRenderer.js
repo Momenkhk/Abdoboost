@@ -156,7 +156,7 @@ function drawBoostBadge(ctx, x, y, color, highlight, faded) {
   ctx.restore();
 }
 
-function drawTimeline(ctx, { currentLevel, totalLevels, width, type }) {
+function drawTimeline(ctx, { currentLevel, totalLevels, width, type, emojis }) {
   const startX = 130;
   const endX = width - 130;
   const iconY = type === 'nitro' ? 150 : 170;
@@ -169,8 +169,24 @@ function drawTimeline(ctx, { currentLevel, totalLevels, width, type }) {
 
     if (type === 'nitro') {
       drawNitroBadge(ctx, x, iconY, NITRO_COLORS[i - 1], isCurrent, isPast);
+
+      ctx.save();
+      ctx.globalAlpha = isPast ? 0.4 : 1;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = isCurrent ? '30px sans-serif' : '24px sans-serif';
+      ctx.fillText(emojis[String(i)] || '•', x, iconY);
+      ctx.restore();
     } else {
       drawBoostBadge(ctx, x, iconY, BOOST_COLORS[i - 1], isCurrent, isPast);
+
+      ctx.save();
+      ctx.globalAlpha = isPast ? 0.4 : 1;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = isCurrent ? '30px sans-serif' : '24px sans-serif';
+      ctx.fillText(emojis[String(i)] || '•', x, iconY);
+      ctx.restore();
 
       ctx.save();
       ctx.globalAlpha = 0.5;
@@ -191,7 +207,7 @@ function drawTimeline(ctx, { currentLevel, totalLevels, width, type }) {
   }
 }
 
-async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, totalLevels, type, progressLine }) {
+async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, totalLevels, type, progressLine, emojis }) {
   const { width, height } = canvasSize;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
@@ -204,7 +220,7 @@ async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, total
   ctx.font = '58px sans-serif';
   ctx.fillText(brandTitle, width / 2, 56);
 
-  drawTimeline(ctx, { currentLevel, totalLevels, width, type });
+  drawTimeline(ctx, { currentLevel, totalLevels, width, type, emojis });
 
   ctx.fillStyle = '#f2f2f2';
   ctx.font = '34px sans-serif';
