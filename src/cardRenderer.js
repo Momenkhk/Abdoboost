@@ -1,5 +1,8 @@
 const { createCanvas } = require('@napi-rs/canvas');
 
+const NITRO_COLORS = ['#a9b6d0', '#f08a35', '#ced6e1', '#f7b02f', '#40b9ff', '#8964ff', '#62ef4f', '#ff4d93', '#86f0ff'];
+const BOOST_COLORS = ['#ffb2ff', '#ff8bff', '#ef73ff', '#ff9af2', '#ffa8f6', '#ff98ff', '#f28bff', '#ffa5ff', '#ff7de8'];
+
 function monthsToMs(months) {
   return months * 30 * 24 * 60 * 60 * 1000;
 }
@@ -50,126 +53,162 @@ function getProgress(startTimestamp, milestoneMonths) {
 
 function drawLuxuryBackground(ctx, width, height) {
   const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, '#040404');
-  bg.addColorStop(0.35, '#161006');
-  bg.addColorStop(0.8, '#0a0a0a');
-  bg.addColorStop(1, '#030303');
+  bg.addColorStop(0, '#061415');
+  bg.addColorStop(0.4, '#030f10');
+  bg.addColorStop(1, '#091717');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const topGold = ctx.createRadialGradient(width * 0.5, 0, 20, width * 0.5, 30, width * 0.75);
-  topGold.addColorStop(0, 'rgba(255, 215, 0, 0.35)');
-  topGold.addColorStop(1, 'rgba(255, 215, 0, 0)');
-  ctx.fillStyle = topGold;
+  const darkOverlay = ctx.createLinearGradient(0, 0, width, 0);
+  darkOverlay.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+  darkOverlay.addColorStop(0.5, 'rgba(0, 0, 0, 0.15)');
+  darkOverlay.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+  ctx.fillStyle = darkOverlay;
   ctx.fillRect(0, 0, width, height);
 
   const blocks = [
-    [35, 340], [88, 370], [145, 332], [200, 362],
-    [width - 240, 48], [width - 182, 83], [width - 125, 45], [width - 72, 78]
+    [30, 330], [90, 375], [160, 336], [230, 382],
+    [width - 235, 28], [width - 170, 78], [width - 100, 32], [width - 48, 85]
   ];
 
   blocks.forEach(([x, y], i) => {
-    const size = i % 2 === 0 ? 62 : 48;
+    const size = i % 2 === 0 ? 72 : 58;
+    const glow = ctx.createLinearGradient(x, y, x + size, y + size);
+    glow.addColorStop(0, '#e3ff41');
+    glow.addColorStop(1, '#8b9d2e');
     ctx.save();
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = '#ffd700';
-    ctx.shadowColor = '#ffe66a';
-    ctx.shadowBlur = 25;
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = glow;
+    ctx.shadowColor = '#dfff4f';
+    ctx.shadowBlur = 20;
     ctx.fillRect(x, y, size, size);
     ctx.restore();
   });
+}
 
+function drawNitroBadge(ctx, x, y, color, highlight, faded) {
   ctx.save();
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  for (let i = 0; i < 9; i += 1) {
-    ctx.fillRect(110 + (i * 135), 80, 100, 280);
+  ctx.globalAlpha = faded ? 0.35 : 1;
+  const scale = highlight ? 1.16 : 1;
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  if (highlight) {
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 20;
   }
+
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(-50, -8);
+  ctx.lineTo(-62, -20);
+  ctx.lineTo(-85, -20);
+  ctx.lineTo(-88, 8);
+  ctx.lineTo(-58, 7);
+  ctx.closePath();
+  ctx.fill();
+
+  const g = ctx.createLinearGradient(-40, -30, 40, 30);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(1, color);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, 45, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.arc(0, 0, 15, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.restore();
 }
 
-function drawTimeline(ctx, { emojis, currentLevel, totalLevels, width, theme }) {
-  const startX = 150;
-  const endX = width - 150;
-  const y = 205;
+function drawBoostBadge(ctx, x, y, color, highlight, faded) {
+  ctx.save();
+  ctx.globalAlpha = faded ? 0.35 : 1;
+  const scale = highlight ? 1.16 : 1;
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  if (highlight) {
+    ctx.shadowColor = '#ff9df4';
+    ctx.shadowBlur = 22;
+  }
+
+  const gem = ctx.createLinearGradient(-20, -25, 20, 25);
+  gem.addColorStop(0, '#ffe5ff');
+  gem.addColorStop(1, color);
+  ctx.fillStyle = gem;
+
+  ctx.beginPath();
+  ctx.moveTo(0, -36);
+  ctx.lineTo(30, 0);
+  ctx.lineTo(0, 36);
+  ctx.lineTo(-30, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawTimeline(ctx, { currentLevel, totalLevels, width, type }) {
+  const startX = 130;
+  const endX = width - 130;
+  const iconY = type === 'nitro' ? 150 : 170;
+  const markerBaseY = 268;
 
   for (let i = 1; i <= totalLevels; i += 1) {
     const x = startX + ((endX - startX) * (i - 1)) / (totalLevels - 1);
     const isPast = i < currentLevel;
     const isCurrent = i === currentLevel;
 
-    const baseW = isCurrent ? 104 : 88;
-    const baseH = isCurrent ? 66 : 58;
+    if (type === 'nitro') {
+      drawNitroBadge(ctx, x, iconY, NITRO_COLORS[i - 1], isCurrent, isPast);
+    } else {
+      drawBoostBadge(ctx, x, iconY, BOOST_COLORS[i - 1], isCurrent, isPast);
 
-    ctx.save();
-    ctx.globalAlpha = isPast ? theme.pastOpacity : 1;
-
-    const chipGradient = ctx.createLinearGradient(x - baseW / 2, y - baseH / 2, x + baseW / 2, y + baseH / 2);
-    chipGradient.addColorStop(0, isCurrent ? '#ffd84d' : '#1a1a1a');
-    chipGradient.addColorStop(1, isCurrent ? '#c79400' : '#090909');
-
-    ctx.fillStyle = chipGradient;
-    ctx.strokeStyle = isCurrent ? '#ffe9a2' : 'rgba(255, 215, 0, 0.45)';
-    ctx.lineWidth = isCurrent ? 3.5 : 2;
-
-    if (isCurrent) {
-      ctx.shadowColor = '#ffd700';
-      ctx.shadowBlur = 30;
-    }
-
-    ctx.beginPath();
-    ctx.roundRect(x - baseW / 2, y - baseH / 2, baseW, baseH, 18);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = isCurrent ? '#161616' : '#ffd700';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = isCurrent ? '38px sans-serif' : '32px sans-serif';
-    ctx.fillText(emojis[String(i)] || '•', x, y - 2);
-
-    ctx.fillStyle = 'rgba(255, 224, 130, 0.95)';
-    ctx.font = '17px sans-serif';
-    ctx.fillText(`L${i}`, x, y + 47);
-
-    if (i < totalLevels) {
-      const nextX = startX + ((endX - startX) * i) / (totalLevels - 1);
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.35)';
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = '#8fa6a8';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x + baseW / 2 + 6, y);
-      ctx.lineTo(nextX - 52, y);
+      ctx.moveTo(x, iconY + 38);
+      ctx.lineTo(x, markerBaseY);
       ctx.stroke();
-    }
 
-    ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(x - 16, markerBaseY + 18);
+      ctx.lineTo(x, markerBaseY + 4);
+      ctx.lineTo(x + 16, markerBaseY + 18);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 }
 
-async function renderMilestoneCard({ emojis, currentLevel, brandTitle, canvasSize, timelineTheme, totalLevels }) {
+async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, totalLevels, type, progressLine }) {
   const { width, height } = canvasSize;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
   drawLuxuryBackground(ctx, width, height);
 
-  ctx.fillStyle = '#ffe08a';
+  ctx.fillStyle = '#d9ff48';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = '64px sans-serif';
-  ctx.fillText(brandTitle, width / 2, 74);
+  ctx.font = '58px sans-serif';
+  ctx.fillText(brandTitle, width / 2, 56);
 
-  drawTimeline(ctx, {
-    emojis,
-    currentLevel,
-    totalLevels,
-    width,
-    theme: timelineTheme
-  });
+  drawTimeline(ctx, { currentLevel, totalLevels, width, type });
 
-  ctx.fillStyle = 'rgba(255, 222, 138, 0.90)';
-  ctx.font = '26px sans-serif';
-  ctx.fillText('Premium Nitro & Boost Timeline', width / 2, 420);
+  ctx.fillStyle = '#f2f2f2';
+  ctx.font = '34px sans-serif';
+  ctx.fillText(progressLine, width / 2, 340);
 
   return await canvas.encode('png');
 }

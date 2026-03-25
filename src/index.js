@@ -47,21 +47,36 @@ function parseSetCommand(message, type, args) {
   return message.reply(`Updated ${type} level ${level} emoji to ${emoji}`);
 }
 
-function resolveStartTimestamp(type, message) {
+async function hasLikelyNitro(user) {
+  const full = await user.fetch(true);
+  return Boolean(
+    full.avatar?.startsWith('a_')
+    || full.avatarDecorationData
+    || full.banner
+  );
+}
+
+async function resolveStartTimestamp(type, message) {
   const record = getOrCreateUserRecord(message.author.id);
 
-  if (type === 'boost' && message.member?.premiumSinceTimestamp) {
-    if (!record.boostStart || record.boostStart !== message.member.premiumSinceTimestamp) {
-      updateUserRecord(message.author.id, { boostStart: message.member.premiumSinceTimestamp });
+  if (type === 'boost') {
+    const boostStart = message.member?.premiumSinceTimestamp;
+    if (!boostStart) return null;
+
+    if (!record.boostStart || record.boostStart !== boostStart) {
+      updateUserRecord(message.author.id, { boostStart });
     }
-    return message.member.premiumSinceTimestamp;
+
+    return boostStart;
   }
 
-  const key = type === 'nitro' ? 'nitroStart' : 'boostStart';
-  if (record[key]) return record[key];
+  const isNitro = await hasLikelyNitro(message.author);
+  if (!isNitro) return null;
+
+  if (record.nitroStart) return record.nitroStart;
 
   const now = Date.now();
-  updateUserRecord(message.author.id, { [key]: now });
+  updateUserRecord(message.author.id, { nitroStart: now });
   return now;
 }
 
@@ -80,16 +95,24 @@ async function sendMilestoneMessage(message, type) {
   const settings = getSettings();
   const emojis = settings[type];
 
-  const startedAt = resolveStartTimestamp(type, message);
+  const startedAt = await resolveStartTimestamp(type, message);
+  if (!startedAt) {
+    await message.reply('خد خمسه جنيه صدقه 😂');
+    return;
+  }
+
   const progress = getProgress(startedAt, config.milestones.months);
+  const progressLine = progress.atMax
+    ? 'You reached the final badge milestone.'
+    : `You will reach next badge in: ${formatRelative(progress.remaining)}`;
 
   const image = await renderMilestoneCard({
-    emojis,
     currentLevel: progress.level,
     brandTitle: config.brand.title,
     canvasSize: config.theme.canvas,
-    timelineTheme: config.theme.timeline,
-    totalLevels: config.milestones.totalLevels
+    totalLevels: config.milestones.totalLevels,
+    type,
+    progressLine
   });
 
   const fileName = `${type}-milestone-${message.author.id}.png`;
@@ -103,10 +126,6 @@ async function sendMilestoneMessage(message, type) {
   const nextBadgeText = progress.atMax
     ? 'Next Badge: MAX level reached'
     : `Next Badge: Level ${progress.nextLevel} ${nextEmoji}`;
-  const progressLine = progress.atMax
-    ? 'You reached the final badge milestone.'
-    : `You will reach next badge in: ${formatRelative(progress.remaining)}`;
-
 
   const container = new ContainerBuilder()
     .addTextDisplayComponents(new TextDisplayBuilder().setContent(`## ${config.brand.title}`))
