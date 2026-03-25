@@ -4,7 +4,6 @@ const {
   GatewayIntentBits,
   MessageFlags,
   PermissionFlagsBits,
-  EmbedBuilder,
   ContainerBuilder,
   TextDisplayBuilder,
   SeparatorBuilder,
@@ -15,13 +14,14 @@ const {
 const { getConfig, getSettings, setEmoji, getOrCreateUserRecord, updateUserRecord } = require('./storage');
 const { getProgress, formatRelative, renderMilestoneCard } = require('./cardRenderer');
 
-const TOKEN = process.env.DISCORD_TOKEN;
 const PREFIX = '-';
 
-if (!TOKEN) throw new Error('Missing DISCORD_TOKEN in environment variables.');
-
 const config = getConfig();
-const embedColor = Number.parseInt(config.brand.embedColor.replace('#', ''), 16);
+const TOKEN = config.bot?.token;
+
+if (!TOKEN || TOKEN === 'PUT_YOUR_BOT_TOKEN_HERE') {
+  throw new Error('Missing bot.token in config.json.');
+}
 
 const client = new Client({
   intents: [
@@ -107,21 +107,9 @@ async function sendMilestoneMessage(message, type) {
     ? 'You reached the final badge milestone.'
     : `You will reach next badge in: ${formatRelative(progress.remaining)}`;
 
-  const embed = new EmbedBuilder()
-    .setColor(embedColor)
-    .setTitle(config.brand.title)
-    .setImage(`attachment://${fileName}`)
-    .setDescription([
-      startedText,
-      `Level: ${progress.level} ${currentEmoji}`,
-      nextBadgeText,
-      '—',
-      progressLine
-    ].join('\n'))
-    .setFooter({ text: config.brand.footer });
 
   const container = new ContainerBuilder()
-    .addTextDisplayComponents(new TextDisplayBuilder().setContent(`# ${config.brand.title}`))
+    .addTextDisplayComponents(new TextDisplayBuilder().setContent(`## ${config.brand.title}`))
     .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
     .addMediaGalleryComponents(
       new MediaGalleryBuilder().addItems(new MediaGalleryItemBuilder().setURL(`attachment://${fileName}`))
@@ -142,7 +130,6 @@ async function sendMilestoneMessage(message, type) {
   await message.channel.send({
     flags: MessageFlags.IsComponentsV2,
     components: [container],
-    embeds: [embed],
     files: [attachment]
   });
 }

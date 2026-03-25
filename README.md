@@ -4,8 +4,9 @@ Premium Nitro/Boost milestone cards for Discord using Node.js + discord.js compo
 
 ## Config (`config.json`)
 
-All visual and milestone options are centralized in `config.json`:
+All visual and runtime options are centralized in `config.json`:
 
+- `bot.token` (Discord bot token)
 - Brand title, footer, and embed color
 - 9 milestone month breakpoints
 - Canvas + timeline theme options
@@ -20,10 +21,23 @@ All visual and milestone options are centralized in `config.json`:
 
 ## Setup
 
+1. Install dependencies:
+
 ```bash
 npm install
-cp .env.example .env
-# set DISCORD_TOKEN
+```
+
+2. Open `config.json` and set:
+
+```json
+"bot": {
+  "token": "YOUR_DISCORD_BOT_TOKEN"
+}
+```
+
+3. Start bot:
+
+```bash
 npm start
 ```
 
