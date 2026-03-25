@@ -4,7 +4,6 @@ const path = require('node:path');
 const rootDir = path.join(__dirname, '..');
 const dataDir = path.join(rootDir, 'data');
 const configPath = path.join(rootDir, 'config.json');
-const settingsPath = path.join(dataDir, 'settings.json');
 const usersPath = path.join(dataDir, 'users.json');
 
 function ensureDir() {
@@ -34,7 +33,6 @@ function readJson(filePath, fallback) {
 }
 
 function writeJson(filePath, data) {
-  ensureDir();
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
@@ -42,21 +40,16 @@ function getConfig() {
   return readJson(configPath);
 }
 
-function getDefaultEmojis() {
+function getSettings() {
   const config = getConfig();
   return config.defaultEmojis;
 }
 
-function getSettings() {
-  ensureDir();
-  return readJson(settingsPath, getDefaultEmojis());
-}
-
 function setEmoji(type, level, emoji) {
-  const settings = getSettings();
-  settings[type][String(level)] = emoji;
-  writeJson(settingsPath, settings);
-  return settings;
+  const config = getConfig();
+  config.defaultEmojis[type][String(level)] = emoji;
+  writeJson(configPath, config);
+  return config.defaultEmojis;
 }
 
 function getUsers() {
@@ -65,6 +58,7 @@ function getUsers() {
 }
 
 function saveUsers(users) {
+  ensureDir();
   writeJson(usersPath, users);
 }
 

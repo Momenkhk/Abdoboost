@@ -10,7 +10,7 @@ All visual and runtime options are centralized in `config.json`:
 - Brand title, footer, and embed color
 - 9 milestone month breakpoints
 - Canvas + timeline theme options
-- Default Nitro/Boost emojis per level (1-9)
+- Default Nitro/Boost emojis per level (1-9), updated directly by `-set-nitro` / `-set-boost` and saved in `config.json`
 
 ## Commands
 
