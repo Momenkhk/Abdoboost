@@ -1,7 +1,7 @@
 const { createCanvas } = require('@napi-rs/canvas');
 
-const NITRO_COLORS = ['#a9b6d0', '#f08a35', '#ced6e1', '#f7b02f', '#40b9ff', '#8964ff', '#62ef4f', '#ff4d93', '#86f0ff'];
-const BOOST_COLORS = ['#ffb2ff', '#ff8bff', '#ef73ff', '#ff9af2', '#ffa8f6', '#ff98ff', '#f28bff', '#ffa5ff', '#ff7de8'];
+const NITRO_COLORS = ['#fff3bf', '#ffe08a', '#ffd25d', '#ffc83f', '#f5b92d', '#e4a91f', '#d29410', '#bc840a', '#a87406'];
+const BOOST_COLORS = ['#fff3bf', '#ffe7a4', '#ffde89', '#ffd26d', '#ffc658', '#f2b543', '#de9f2c', '#c98d1a', '#b77d10'];
 
 function monthsToMs(months) {
   return months * 30 * 24 * 60 * 60 * 1000;
@@ -53,9 +53,9 @@ function getProgress(startTimestamp, milestoneMonths) {
 
 function drawLuxuryBackground(ctx, width, height) {
   const bg = ctx.createLinearGradient(0, 0, width, height);
-  bg.addColorStop(0, '#061415');
-  bg.addColorStop(0.4, '#030f10');
-  bg.addColorStop(1, '#091717');
+  bg.addColorStop(0, '#050505');
+  bg.addColorStop(0.4, '#151003');
+  bg.addColorStop(1, '#090909');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
@@ -74,12 +74,12 @@ function drawLuxuryBackground(ctx, width, height) {
   blocks.forEach(([x, y], i) => {
     const size = i % 2 === 0 ? 72 : 58;
     const glow = ctx.createLinearGradient(x, y, x + size, y + size);
-    glow.addColorStop(0, '#e3ff41');
-    glow.addColorStop(1, '#8b9d2e');
+    glow.addColorStop(0, '#ffe46b');
+    glow.addColorStop(1, '#8c6e14');
     ctx.save();
     ctx.globalAlpha = 0.4;
     ctx.fillStyle = glow;
-    ctx.shadowColor = '#dfff4f';
+    ctx.shadowColor = '#ffd95a';
     ctx.shadowBlur = 20;
     ctx.fillRect(x, y, size, size);
     ctx.restore();
@@ -190,7 +190,7 @@ function drawTimeline(ctx, { currentLevel, totalLevels, width, type, emojis }) {
 
       ctx.save();
       ctx.globalAlpha = 0.5;
-      ctx.strokeStyle = '#8fa6a8';
+      ctx.strokeStyle = '#9f8b4a';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(x, iconY + 38);
@@ -214,7 +214,7 @@ async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, total
 
   drawLuxuryBackground(ctx, width, height);
 
-  ctx.fillStyle = '#d9ff48';
+  ctx.fillStyle = '#FFD700';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '58px sans-serif';
@@ -222,7 +222,7 @@ async function renderMilestoneCard({ currentLevel, brandTitle, canvasSize, total
 
   drawTimeline(ctx, { currentLevel, totalLevels, width, type, emojis });
 
-  ctx.fillStyle = '#f2f2f2';
+  ctx.fillStyle = '#f5e6ad';
   ctx.font = '34px sans-serif';
   ctx.fillText(progressLine, width / 2, 340);
 
